@@ -37,6 +37,7 @@ plos <- do.call(rbind, plos.all)
 
 # Fig. 1: Bean plot showing distribution of author counts
 #         per journal overall
+svg("../figures/authInflation_f1_beanplot.svg", 6, 8)
 ggplot(plos, aes(x=journal, y=counts, fill=journal)) +
   geom_violin(scale="width") +
   geom_boxplot(width=.12, fill=I("black"), notch=T,
@@ -46,9 +47,10 @@ ggplot(plos, aes(x=journal, y=counts, fill=journal)) +
   coord_flip() + labs(x="", y="Number of authors per paper") +
   theme_classic() + theme(legend.position="none") +
   scale_fill_brewer()
+dev.off()
 
 # Fig 2. ECDFs of the author count distributions
-# 5in x 5in
+svg("../figures/authInflation_f2_ecdf.svg", 5, 5)
 ggplot(plos, aes(x=counts, col=journal)) + 
   stat_ecdf(geom="smooth", se=F, size=1.2) + theme_bw() +
   scale_x_log10(breaks=c(1:5, seq(10, 50, by=10), 100, 200, 300)) +
@@ -56,10 +58,11 @@ ggplot(plos, aes(x=counts, col=journal)) +
   labs(x="Number of authors per paper", y="ECDF",
        col="") + coord_cartesian(xlim=c(1,300)) +
   scale_color_brewer(type="qual", palette=6)
+dev.off()
 
 # Fig 3. Trends in author counts over time with
 #        confidence limits on the means
-# 7 x 7
+svg("../figures/authInflation_f3_ribbon.svg", 7, 7)
 ggplot(plos, aes(x=year, y=counts, col=journal, fill=journal)) +
   stat_summary(fun.data="mean_cl_boot", geom="ribbon",
                width=.2, alpha=I(.5)) +
@@ -72,7 +75,7 @@ ggplot(plos, aes(x=year, y=counts, col=journal, fill=journal)) +
                                        title=NULL, ncol=2,
                                        label.hjust=0.5)) +
   scale_color_brewer(type="qual", palette=2, guide="none")
-
+dev.off()
 
 # from http://stackoverflow.com/a/17024184/1274516
 # show regression equation on each graph facet
@@ -95,12 +98,11 @@ means <- group_by(means, journal) %.% summarise(m=max(counts))
 df$top <- means$m * 1.2
 
 # Fig 4. Facetted linear regression of author inflation per journal
-# 6 x 8.5
+svg("../figures/authInflation_f4_regression.svg", 8.5, 6)
 ggplot(plos, aes(x=year, y=counts, col=journal, fill=journal)) +
   stat_summary(fun.data="mean_cl_boot", geom="errorbar",
                width=.2, alpha=I(.5)) +
   stat_summary(fun.y="mean", geom="point") +
-  #stat_summary(fun.y="median", geom="point", shape=4) +
   facet_wrap(~journal, scales="free_y") +
   geom_smooth(method="lm") +
   scale_x_continuous(breaks=2006:2013) +
@@ -109,11 +111,11 @@ ggplot(plos, aes(x=year, y=counts, col=journal, fill=journal)) +
   scale_fill_brewer(type="qual", palette=2, guide="none") +
   scale_color_brewer(type="qual", palette=2, guide="none") +
   geom_text(data=df, aes(x=2009.5, y=top, label=beta), size=3, parse=T)
+dev.off()
 
 # Overall estimate of author inflation? 
 # .21 extra authors per paper per year, on average
 s <- summary(lm(counts ~ year + journal, data=plos))
-
 
 # Summary barchart data:
 bc <- data.frame(journal = unique(means$journal),
@@ -139,7 +141,7 @@ bc <- data.frame(journal = unique(means$journal),
 bc$journal <- factor(bc$journal, levels=bc$journal[order(bc$trend)])
 
 # Fig 5. Barchart of author inflation estimate per journal.
-# 7 x 5
+svg("../figures/authInflation_f5_barchart.svg", 5, 7)
 ggplot(bc, aes(x=journal, y=trend, fill=journal, ymin=trend-std.err,
                ymax=trend+std.err)) +
   geom_bar(stat="identity") +
@@ -150,10 +152,11 @@ ggplot(bc, aes(x=journal, y=trend, fill=journal, ymin=trend-std.err,
        y="Estimate of annual author inflation (additional mean authors per paper)") +
   theme(axis.text.x=element_text(angle=45, hjust=1)) +
   scale_fill_brewer(palette="Blues", guide="none")
+dev.off()
 
 pcc <- cor(bc$trend, bc$IF)
 # Fig 6. Correlation of author inflation and journal impact factors.
-# 5 x 5
+svg("../figures/authInflation_f6_IFcor.svg", 5, 5)
 ggplot(bc, aes(x=trend, y=IF, col=journal)) +
   geom_text(aes(label=journal)) + xlim(0,.6) +
   labs(x="Author inflation estimate",
@@ -161,6 +164,7 @@ ggplot(bc, aes(x=trend, y=IF, col=journal)) +
   scale_color_brewer(type="qual", palette=2, guide="none") +
   annotate("text", x=.05, y=15, 
            label=paste0("rho == ", format(pcc, digits=2)), parse=T)
+dev.off()
 
 # N.S. (p = 0.18)
 cor.test(bc$trend, bc$IF)
