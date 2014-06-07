@@ -1,7 +1,7 @@
 blogR
 =====
 
-Scripts and data to recreate analyses published on http://benjaminlmoore.wordpress.com
+Scripts and data to recreate analyses published on http://benjaminlmoore.wordpress.com and/or http://blm.io
 
 (Not currently structured as an R package but probably should be.)
 
