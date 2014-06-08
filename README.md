@@ -15,4 +15,4 @@ Scripts and data to recreate analyses published on http://benjaminlmoore.wordpre
 
 4. Celebrity twitter demographics by gender [[Post](http://benjaminlmoore.wordpress.com/2014/05/25/celebrity-twitter-followers-by-gender/) | [Code](R/twitter_followersGender.R) | [Interactive](http://blm.io/twitter)]
 
-5. Careers of Hollywood action heroes charted [Post | [Code](R/imdb_actionHeroes.R) | [Interactive](http://blm.io/action)]
+5. Careers of Hollywood action heroes charted [[Post + Interactive](http://blm.io/action) | [Code 1](blogpy/imdb_getActors.py), [Code 2](R/imdb_actionHeroes.R) ]
