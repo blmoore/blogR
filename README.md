@@ -17,4 +17,4 @@ Scripts and data to recreate analyses published on http://benjaminlmoore.wordpre
 
 5. Careers of Hollywood action heroes charted [[Post + Interactive](http://blm.io/action) | [Code 1](blogpy/imdb_getActors.py), [Code 2](R/imdb_actionHeroes.R) ]
 
-6. Are more expensive motorcycle helmets more expensive? [[Post](http://blm.io/blog/motorcycle-helmet-safety-price/) | [Code](R/sharp_bikehelms.R)]
+6. Are more expensive motorcycle helmets more protective? [[Post](http://blm.io/blog/motorcycle-helmet-safety-price/) | [Code](R/sharp_bikehelms.R)]
