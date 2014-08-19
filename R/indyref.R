@@ -1,8 +1,12 @@
+library("dplyr")
 library("ggplot2")
 library("grid")
 library("reshape2")
 library("scales")
 library("XML")
+library("zoo")
+
+setwd("~/other/blog/blogR/")
 
 # First row w/ headers breaks
 polls <- readHTMLTable("http://ukpollingreport.co.uk/scottish-independence-referendum", skip.rows=1)[[1]]
@@ -25,7 +29,7 @@ polls <- melt(polls, id.vars=c("pollster", "date"),
 colnames(polls)[3] <- "response"
 levels(polls$response) <- c("Yes", "No", "Undecided")
 
-#pdf("~/other/blog/blogR/figures/indyref.pdf", 7, 6)
+pdf("figures/indyref_trends.pdf", 7, 6)
 ggplot(polls, aes(x=date, y=value, col=response, fill=response)) + 
   geom_point() + geom_smooth(method="loess", alpha=I(.2)) +
   theme_blm() + 
@@ -36,7 +40,7 @@ ggplot(polls, aes(x=date, y=value, col=response, fill=response)) +
   scale_y_continuous(breaks=seq(0, 70, 10), limits=c(0,70)) +
   ggtitle("Should Scotland be an independent country?") +
   labs(x="", y="%", fill="Poll response:", col="Poll response:")
-#dev.off()
+dev.off()
 
 ## results per pollster
 
@@ -58,21 +62,88 @@ company <- c("Panelbase", "YouGov", "Ipsos MORI", "Survation",
 
 polls <- cbind(polls, cols)
 
-library("dplyr")
-sdf <- group_by(polls, newspaper, response) %>% 
-## optional, exlucde don't know:
-  filter(response != "Undecided") %>%
-  summarise(median=median(value), count=n()) %>%
-  arrange(median)
+## Residual analysis per pollster or commisioning entity
+l.y <- loess(value ~ as.numeric(date), data=subset(polls, response=="Yes"))
+l.n <- loess(value ~ as.numeric(date), data=subset(polls, response=="No"))
+l.u <- loess(value ~ as.numeric(date), data=subset(polls, response=="Undecided"))
+with(polls, plot(as.numeric(date), value))
+lines(as.numeric(polls[polls$response == "Yes",]$date),
+      predict(l.y, as.numeric(polls[polls$response == "Yes",]$date)))
 
-head(sdf)
-sdf <- group_by(sdf, newspaper) %>% mutate(total=sum(median))
+# Calculate predicted values per row, 
+polls$predicted <- NA
+loessPred <- function(resp, model){
+  rows <- polls$response == resp
+  curr <- polls[rows,]
+  preds <- with(curr, predict(model, as.numeric(date)))
+  polls[rows,]$predicted <<- preds
+}
 
-ggplot(subset(sdf, count > 3), 
-       aes(x=newspaper, y=median/total, fill=response)) +
-  geom_bar(stat="identity", position="stack") +
-  coord_flip() + theme_blm()
-  
-  geom_boxplot(position=position_dodge(.8)) + theme_blm() + 
-  geom_point(position=position_dodge(.8))
+loessPred("Yes", l.y)
+loessPred("No", l.n)
+loessPred("Undecided", l.u)
 
+polls$residual <- polls$value - polls$predicted
+hist(polls$residual)
+
+ggplot(polls, aes(x=company, y=residual)) +
+  geom_violin(scale="width") + geom_jitter() + 
+  coord_flip()
+
+## Order newspaper by median residual:
+ordering <- group_by(polls, newspaper) %>%
+  filter(response == "Yes") %>%
+  summarise(med = median(residual, na.rm=T), count=n()) %>%
+  arrange(med) 
+polls$newspaper <- factor(polls$newspaper, levels=ordering$newspaper)
+
+
+## Testing for biases by a given pollster or newspaper/org commisioning a poll
+pdf("figures/indyref_YesBias.pdf", 6, 6)
+ggplot(subset(polls, response == "Yes" & 
+                newspaper %in% ordering[ordering$count > 1,"newspaper"]), 
+       aes(x=newspaper, y=residual)) +
+  geom_hline(aes(yintercept=0)) +
+  geom_violin(scale="width", fill=I("grey90"), col=I("grey90")) + 
+  geom_jitter(position=position_jitter(width=.05)) + 
+  stat_summary(geom = "crossbar", width=0.65, fatten=2, 
+               color="grey40", fun.y=median, fun.ymin=median, fun.ymax=median) +
+  #stat_summary(fun.y="mean_cl_boot", geom="point", col=I("red")) +
+  coord_flip() + theme_blm() + ggtitle("Relative yes responses") +
+  labs(x="Poll commisioner / publisher",
+       y="Comparison with other polls at the time") +
+  ylim(-13,13)
+dev.off()
+
+## Stat significance:
+options(scipen=9)
+group_by(subset(polls, response == "Yes" & 
+                  newspaper %in% ordering[ordering$count > 1,"newspaper"]), newspaper) %>%
+  summarise(p=t.test(residual, mu=0)$p.value)
+
+
+ord.2 <- group_by(polls, company) %>%
+  filter(response == "Yes") %>%
+  summarise(med = median(residual, na.rm=T), count=n()) %>%
+  arrange(med) 
+polls$company <- factor(polls$company, levels=ord.2$company)
+
+#pdf("figures/indyref_YesBias.pdf", 6, 6)
+ggplot(subset(polls[complete.cases(polls),], response == "Yes" & 
+                company %in% ord.2[ord.2$count > 1,"company"]), 
+       aes(x=company, y=residual)) +
+  geom_hline(aes(yintercept=0)) +
+  geom_violin(scale="width", fill=I("grey90"), col=I("grey90")) + 
+  geom_jitter(position=position_jitter(width=.05)) + 
+  stat_summary(geom = "crossbar", width=0.65, fatten=2, 
+               color="grey40", fun.y=median, fun.ymin=median, fun.ymax=median) +
+  #stat_summary(fun.y="mean_cl_boot", geom="point", col=I("red")) +
+  coord_flip() + theme_blm() + ggtitle("Relative yes responses") +
+  labs(x="Pollster",
+       y="Comparison with other polls at the time") +
+  ylim(-13,13)
+#dev.off()
+
+group_by(subset(polls, response == "Yes" & 
+                  company %in% ord.2[ord.2$count > 1,"company"]), company) %>%
+  summarise(p=t.test(residual, mu=0)$p.value)
