@@ -86,10 +86,6 @@ loessPred("Undecided", l.u)
 polls$residual <- polls$value - polls$predicted
 hist(polls$residual)
 
-ggplot(polls, aes(x=company, y=residual)) +
-  geom_violin(scale="width") + geom_jitter() + 
-  coord_flip()
-
 ## Order newspaper by median residual:
 ordering <- group_by(polls, newspaper) %>%
   filter(response == "Yes") %>%
@@ -99,7 +95,7 @@ polls$newspaper <- factor(polls$newspaper, levels=ordering$newspaper)
 
 
 ## Testing for biases by a given pollster or newspaper/org commisioning a poll
-pdf("figures/indyref_YesBias.pdf", 6, 6)
+pdf("figures/indyref_YesBiasNewspapers.pdf", 6, 6)
 ggplot(subset(polls, response == "Yes" & 
                 newspaper %in% ordering[ordering$count > 1,"newspaper"]), 
        aes(x=newspaper, y=residual)) +
@@ -110,7 +106,7 @@ ggplot(subset(polls, response == "Yes" &
                color="grey40", fun.y=median, fun.ymin=median, fun.ymax=median) +
   #stat_summary(fun.y="mean_cl_boot", geom="point", col=I("red")) +
   coord_flip() + theme_blm() + ggtitle("Relative yes responses") +
-  labs(x="Poll commisioner / publisher",
+  labs(x="Poll commissioner / publisher",
        y="Comparison with other polls at the time") +
   ylim(-13,13)
 dev.off()
@@ -128,7 +124,7 @@ ord.2 <- group_by(polls, company) %>%
   arrange(med) 
 polls$company <- factor(polls$company, levels=ord.2$company)
 
-#pdf("figures/indyref_YesBias.pdf", 6, 6)
+pdf("figures/indyref_YesBiasPollsters.pdf", 6, 6)
 ggplot(subset(polls[complete.cases(polls),], response == "Yes" & 
                 company %in% ord.2[ord.2$count > 1,"company"]), 
        aes(x=company, y=residual)) +
@@ -137,12 +133,11 @@ ggplot(subset(polls[complete.cases(polls),], response == "Yes" &
   geom_jitter(position=position_jitter(width=.05)) + 
   stat_summary(geom = "crossbar", width=0.65, fatten=2, 
                color="grey40", fun.y=median, fun.ymin=median, fun.ymax=median) +
-  #stat_summary(fun.y="mean_cl_boot", geom="point", col=I("red")) +
   coord_flip() + theme_blm() + ggtitle("Relative yes responses") +
   labs(x="Pollster",
        y="Comparison with other polls at the time") +
   ylim(-13,13)
-#dev.off()
+dev.off()
 
 group_by(subset(polls, response == "Yes" & 
                   company %in% ord.2[ord.2$count > 1,"company"]), company) %>%
