@@ -10,11 +10,13 @@ setwd("~/other/blog/blogR/")
 
 # First row w/ headers breaks
 polls <- readHTMLTable("http://ukpollingreport.co.uk/scottish-independence-referendum", skip.rows=1)[[1]]
+colnames(polls) <- c("pollster", "date", "yes", "no",
+                     "non-voting", "dontknow", "yessplit")
+polls
+
 
 # inspect
 str(polls)
-colnames(polls) <- c("pollster", "date", "yes", "no",
-                     "non-voting", "dontknow", "yessplit")
 
 f2n <- function(x)
   as.numeric(as.character(x))
@@ -115,7 +117,7 @@ dev.off()
 options(scipen=9)
 group_by(subset(polls, response == "Yes" & 
                   newspaper %in% ordering[ordering$count > 1,"newspaper"]), newspaper) %>%
-  summarise(p=t.test(residual, mu=0)$p.value)
+  summarise(p=wilcox.test(residual, mu=0)$p.value)
 
 
 ord.2 <- group_by(polls, company) %>%
@@ -142,3 +144,10 @@ dev.off()
 group_by(subset(polls, response == "Yes" & 
                   company %in% ord.2[ord.2$count > 1,"company"]), company) %>%
   summarise(p=t.test(residual, mu=0)$p.value)
+
+
+qqnorm(polls$residual)
+abline(0,1)
+shapiro.test(polls$residual)
+hist(polls$residual)
+wilcox.test(
