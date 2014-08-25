@@ -114,9 +114,9 @@ ggplot(subset(polls, response == "Yes" &
 dev.off()
 
 ## Stat significance:
-options(scipen=9)
+options(scipen=0)
 group_by(subset(polls, response == "Yes" & 
-                  newspaper %in% ordering[ordering$count > 1,"newspaper"]), newspaper) %>%
+         newspaper %in% ordering[ordering$count > 1,"newspaper"]), newspaper) %>%
   summarise(p=wilcox.test(residual, mu=0)$p.value)
 
 
@@ -143,11 +143,16 @@ dev.off()
 
 group_by(subset(polls, response == "Yes" & 
                   company %in% ord.2[ord.2$count > 1,"company"]), company) %>%
-  summarise(p=t.test(residual, mu=0)$p.value)
+  summarise(p=wilcox.test(residual, mu=0)$p.value)
 
 
-qqnorm(polls$residual)
-abline(0,1)
-shapiro.test(polls$residual)
-hist(polls$residual)
-wilcox.test(
+library("xtable")
+xt <- data.frame(date=rep("12-15 Aug", 2),
+                 pollster=c("YouGov", "Panelbase"),
+                 client=c("The Times", "Yes Scotland"),
+                 sample.size=c(1085, 1026),
+                 yes=c(38, 42),
+                 no=c(51, 46), 
+                 undecided=c(11, 12),
+                 spread=c(13, 4))
+print(xtable(xt), type="html")
