@@ -4,16 +4,13 @@ library("grid")
 library("reshape2")
 library("scales")
 library("XML")
+library("xtable")
 library("zoo")
-
-setwd("~/other/blog/blogR/")
 
 # First row w/ headers breaks
 polls <- readHTMLTable("http://ukpollingreport.co.uk/scottish-independence-referendum", skip.rows=1)[[1]]
 colnames(polls) <- c("pollster", "date", "yes", "no",
                      "non-voting", "dontknow", "yessplit")
-polls
-
 
 # inspect
 str(polls)
@@ -25,6 +22,7 @@ polls$date <- as.Date(polls$date, format="%d/%m/%y")
 polls$yes <- f2n(polls$yes)
 polls$no <- f2n(polls$no)
 polls$dontknow <- f2n(polls$dontknow)
+polls.orig <- polls
 
 polls <- melt(polls, id.vars=c("pollster", "date"), 
      measure.var=c("yes", "no", "dontknow"))
@@ -44,8 +42,9 @@ ggplot(polls, aes(x=date, y=value, col=response, fill=response)) +
   labs(x="", y="%", fill="Poll response:", col="Poll response:")
 dev.off()
 
-## results per pollster
 
+
+## results per pollster
 polls$pollster <- gsub(" ?\\(.*", "", polls$pollster)
 polls$pollster <- gsub("-", " ", polls$pollster)
 
@@ -94,7 +93,6 @@ ordering <- group_by(polls, newspaper) %>%
   summarise(med = median(residual, na.rm=T), count=n()) %>%
   arrange(med) 
 polls$newspaper <- factor(polls$newspaper, levels=ordering$newspaper)
-
 
 ## Testing for biases by a given pollster or newspaper/org commisioning a poll
 pdf("figures/indyref_YesBiasNewspapers.pdf", 6, 6)
@@ -145,8 +143,7 @@ group_by(subset(polls, response == "Yes" &
                   company %in% ord.2[ord.2$count > 1,"company"]), company) %>%
   summarise(p=wilcox.test(residual, mu=0)$p.value)
 
-
-library("xtable")
+## generate HTML table
 xt <- data.frame(date=rep("12-15 Aug", 2),
                  pollster=c("YouGov", "Panelbase"),
                  client=c("The Times", "Yes Scotland"),
@@ -156,3 +153,23 @@ xt <- data.frame(date=rep("12-15 Aug", 2),
                  undecided=c(11, 12),
                  spread=c(13, 4))
 print(xtable(xt), type="html")
+
+polls.orig$perc <- with(polls.orig, 100*(yes / (yes+no)))
+pdf("figures/indyref_yesPercent.pdf", 7, 4)
+ggplot(polls.orig, aes(x=date, y=perc, ymin=0, ymax=perc)) +
+  theme_blm() + geom_ribbon(fill=I("grey90")) +
+  #geom_point() + 
+  geom_line() + geom_smooth(method="lm", col=I("darkgrey")) +
+  labs(y="Yes support (%)", x="") + 
+  geom_hline(yintercept=50, col=I("#ffa775")) +
+  scale_x_date(breaks="4 months", minor_breaks=NULL, 
+               labels=date_format("%b '%y"), expand=c(.05,-5)) +
+  scale_y_continuous(breaks=seq(0, 100, by=10), limits=c(0,60))
+dev.off()
+
+## Sily stuff:
+lmod <- lm(perc ~ date, data=polls.orig)
+summary(lmod)
+predict(lmod, data.frame(date=as.Date("2014-09-18")), se.fit=T)
+# 42.94 % yes, +- .78*2.58
+# 40.9 to 45.0
