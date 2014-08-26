@@ -19,4 +19,4 @@ Scripts and data to recreate analyses published on http://benjaminlmoore.wordpre
 
 6. Are more expensive motorcycle helmets more protective? [[Post](http://blm.io/blog/motorcycle-helmet-safety-price/) | [Code](R/sharp_bikehelms.R)]
 
-7. Scottish independence: what do the polls say? [Post | [Code](R/indyref.R)]
+7. Scottish independence: what do the polls say? [[Post](http://blm.io/blog/scottish-independence-polls/) | [Code](R/indyref.R)]
