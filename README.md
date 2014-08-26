@@ -3,7 +3,7 @@ blogR
 
 Scripts and data to recreate analyses published on http://benjaminlmoore.wordpress.com and/or http://blm.io
 
-Some of these scripts make use of [`blmR`](https://github.com/blmoore/blmR) which can be installed with: `devtools::install_github("blmR", "blmoore")`. Calls to `theme_blm()` can just be replaced with `theme_bw()` for similar resulting plots.
+Some of these scripts make use of [`blmR`](https://github.com/blmoore/blmR) which can be installed with: `devtools::install_github("blmR", "blmoore")`. Calls to `theme_blm()` can just be replaced with `theme_bw()` for similar looking plots.
 
 ## Contents 
 
