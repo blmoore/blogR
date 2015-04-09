@@ -24,18 +24,15 @@ colnames(measles) <- c("year", "week", "state", "cases")
 mdf <- measles %>% group_by(state, year) %>% summarise(c=sum(cases))
 mdf$state <- factor(mdf$state, levels=rev(levels(mdf$state)))
 
-# from R-manual: converts to Title Case
+# edited from R-manual: converts AnyTHInG to Title Case
 .simpleCap <- function(x) {
   s <- strsplit(x, " ")[[1]]
-  paste(toupper(substring(s, 1, 1)), substring(s, 2),
+  paste(toupper(substring(s, 1, 1)), tolower(substring(s, 2)),
         sep = "", collapse = " ")
 }
 
-# format NEW YORK -> New York (tidy this up w/ magrittr pipes)
 levels(mdf$state) <- sapply(as.character(levels(mdf$state)), 
-       function(i) .simpleCap(
-         gsub("\\.", " ", paste0(substr(i, 1, 1), tolower(substring(i, 2)))
-       )))                                                  
+       function(i) .simpleCap(gsub("\\.", " ", i)))                                                  
 
 # Hack together a colourbar
 cols <- c(colorRampPalette(c(rgb(224, 232, 247, max=255), # v light blue
