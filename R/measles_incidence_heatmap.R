@@ -11,17 +11,19 @@ library("reshape2")
 #           disease outcome: incidence } ->
 # Add all states -> "Click here to download results to Excel."
 # (open in excel, export to CSV and then...)
-measles <- read.csv("incidence.csv", header=T, 
+measles <- read.csv("data/measles_incidence.csv", header=T, 
                     skip=2, stringsAsFactors=F)
 
-measles[measles == "-"] <- 0
+measles[measles == "-"] <- NA
+
 measles[,-(1:2)] <- apply(measles[,-(1:2)], 2, as.numeric)
 
 measles <- melt(measles, id.var=c("YEAR", "WEEK"))
 colnames(measles) <- c("year", "week", "state", "cases")
 
 # aggregate to yearly totals
-mdf <- measles %>% group_by(state, year) %>% summarise(c=sum(cases))
+mdf <- measles %>% group_by(state, year) %>% 
+  summarise(c=if(all(is.na(cases))) NA else sum(cases, na.rm=T))
 mdf$state <- factor(mdf$state, levels=rev(levels(mdf$state)))
 
 # edited from R-manual: converts AnyTHInG to Title Case
@@ -34,38 +36,24 @@ mdf$state <- factor(mdf$state, levels=rev(levels(mdf$state)))
 levels(mdf$state) <- sapply(as.character(levels(mdf$state)), 
        function(i) .simpleCap(gsub("\\.", " ", i)))                                                  
 
-# Hack together a colourbar
-cols <- c(colorRampPalette(c(rgb(224, 232, 247, max=255), # v light blue
-                             rgb(10, 120, 200, max=255), # deeper blue
-                             rgb(59, 159, 57, max=255) # green
-                             ))(10),
-          colorRampPalette(c("yellow", 
-                             rep(rgb(219, 131, 0, max=255),2), #orange
-                            "red", "red", "red", "red"))(40))
-breaks <- c(0, 10, 20, 50, 75, 
-            100, 150, 200, 400, seq(500, 5000, length.out=50))
-
-# building labels:
-labels <- rep("", length(breaks))
-# all approx:
-labels[1] <- "0k"
-labels[15] <- "1k"
-labels[26] <- "2k"
-labels[37] <- "3k"
-labels[48] <- "4k"
+# hack together a colourbar
+cols <- c(colorRampPalette(c("#e7f0fa", "#c9e2f6", "#95cbee", "#0099dc",
+                             "#4ab04a", "#ffd73e"))(10),
+          colorRampPalette(c("#eec73a", "#e29421",
+                             "#e29421", "#f05336","#ce472e"),
+                           bias=2)(90))
 
 # plot to PDF device (might fail on some devices due to fonts)
-pdf("hm.pdf", 8, 6)
+pdf("figures/measles_incidence_heatmap_2.pdf", 8, 6)
 ggplot(mdf, aes(y=state, x=year, fill=c)) + 
   geom_tile(colour="white") + theme_minimal() +
-  scale_fill_gradientn(colours=cols,
-                       limits=c(0, 4000),
-                       breaks=breaks,
-                       labels=labels,
-                       guide=guide_colourbar(ticks=F,
-                                             nbin=50,
-                                             barheight=.5, label=T,
-                                             barwidth=10)) +
+    scale_fill_gradientn(colours=cols, limits=c(0, 4000),
+                         breaks=seq(0, 4e3, by=1e3), 
+                         na.value=rgb(246, 246, 246, max=255),
+                         labels=c("0k", "1k", "2k", "3k", "4k"),
+                         guide=guide_colourbar(ticks=F, nbin=50,
+                                               barheight=.5, label=T,
+                                               barwidth=10)) +
   scale_x_continuous(expand=c(0,0), breaks=seq(1930, 2010, by=10)) +
   geom_segment(x=1963, xend=1963, y=0, yend=51.5, size=.9, lineend = "round") +
   labs(x="", y="", fill="") +
@@ -74,8 +62,9 @@ ggplot(mdf, aes(y=state, x=year, fill=c)) +
         legend.direction="horizontal",
         legend.text=element_text(colour="grey20"),
         plot.margin=grid::unit(c(.5,.5,1.5,.5), "cm"),
-        axis.text.y=element_text(size=6, family="Helvetica"),
+        axis.text.y=element_text(size=6, family="Helvetica", hjust=1),
         axis.text.x=element_text(size=8),
+        axis.ticks.y=element_blank(),
         title=element_text(hjust=-.07, face="bold", vjust=1, family="Helvetica"),
         text=element_text(family="URWHelvetica")) +
   annotate("text", label="Vaccine introduced", x=1963, y=53, vjust=1, hjust=0,
