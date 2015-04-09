@@ -1,5 +1,13 @@
 d <- read.csv2("http://www.ark-genomics.org/tmp/Twitter50.txt", sep="\t")
 
+library("ggplot2")
+
+ggplot(d, aes(x=Citations, y=Followers)) + 
+  geom_point() + 
+  coord_trans(x="log10", y="log10") +
+  scale_x_log10(limits=c(10, 1e6)) +
+  scale_y_log10(limits=c(1e4, 1e7))
+
 library("rCharts")
 
 i <- dPlot(Followers ~ Citations, data=d, type="bubble",
