@@ -30,7 +30,10 @@ shinyUI(fluidPage(
                          selected = c("CON", "LAB", "LD")),
             dateRangeInput('dates',
                            label = h4('Polls taken between:'),
-                           start = as.Date("2010-05-13"), end = Sys.Date())
+                           start = as.Date("2010-05-13"), end = Sys.Date()),
+      radioButtons("radio", label = h4("Aggregation:"),
+                   choices = list("None (all polls)" = 1, "Weekly average" = 2), 
+                   selected = 1, inline=T)
     ),
 
     # Show a plot of the generated distribution
