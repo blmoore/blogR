@@ -17,7 +17,7 @@ shinyUI(fluidPage(
   sidebarLayout(
     sidebarPanel(
       p("Explore voter intention data leading up to the UK general
-        election on May 7. The data is scraped live from the ",
+        election on May 7. Data scraped live from the ",
       a(href="http://ukpollingreport.co.uk/voting-intention-2", "UK polling report.")
       ),
       checkboxGroupInput("parties", 

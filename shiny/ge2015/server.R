@@ -31,6 +31,7 @@ int$value <- as.numeric(int$value)
 theme_set(theme_blm())
 
 palette <- brewer.pal(9, "Pastel1")[c(2,1,6,4,3)]
+palette <- darken_col(palette, by=.1)
 
 shinyServer(function(input, output) {
 
@@ -39,8 +40,8 @@ shinyServer(function(input, output) {
     
     ggplot(subset(int, variable %in% plist),
            aes(x=date, y=value, col=variable, fill=variable)) +
-      geom_jitter(alpha=I(.3)) +
-      geom_smooth(show_guide=F, col=NA) +
+      geom_jitter(alpha=I(.3), size=I(1.4)) +
+      geom_smooth(show_guide=F, col=I("grey65")) +
       scale_color_manual(values=palette, drop=T, limits=levels(int$variable)) +
       scale_fill_manual(values=palette, drop=T, limits=levels(int$variable)) +
       labs(col="Party", fill="Party", y="Voting intention (%)", x="") +
