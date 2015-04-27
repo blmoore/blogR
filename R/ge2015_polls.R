@@ -1,5 +1,6 @@
 ## ge205 polling data
 library("blmR")
+library("dplyr")
 library("ggplot2")
 library("RColorBrewer")
 library("reshape2")
@@ -42,19 +43,11 @@ ggplot(int, aes(x=date, y=value, col=variable)) +
   theme(legend.position="top")
 #dev.off()   
 
-# classify pollster and commisioner from a previous post:
-testing <- unique(int$pollster)
-
-table(unlist(strsplit(int$pollster, "\\/")))
-
-
-
-# commision
+# commisioned by...
 newspapers <- c("Sunday Times", "Sun", "Times", "Independent",
                 "Independent on Sunday", "Evening Standard",
                 "Sunday Times", "Observer", "Sunday Telegraph",
                 "Mirror", "Mail on Sunday")
-int$pollster
 
 int$newspaper <- NA
 
@@ -63,8 +56,6 @@ for(n in newspapers){
 }
 
 int$newspaper <- as.factor(int$newspaper)
-
-library("dplyr")
 counts <- int %>% group_by(newspaper) %>% tally()
 pick <- counts[which(counts$n > 150),]$newspaper
 
@@ -80,16 +71,15 @@ ggplot(subset(int, newspaper %in% pick),
                              direction="vertical", keywidth=.8, ncol=1)) +
   theme(legend.position=c(.85, .15))
 
-# running median of all polls, graph differences per pollster
 
+# aggregate into weekly average voting intention
 int$week <- cut(int$date, "week")
-
 weeks <- int %>% group_by(variable, week) %>% 
   summarise(av=mean(value))
 
 pdf("figures/ge2015_votingIntentionWeekly.pdf", 6, 4)
 ggplot(weeks, aes(x=as.Date(week), y=av, col=variable)) +
-  geom_point() + geom_smooth(col=NA, aes(fill=variable)) +
+  geom_point(size=1.25) + geom_smooth(col=NA, aes(fill=variable)) +
   scale_color_manual(values=palette) +
   scale_fill_manual(values=palette) +
   labs(col="", fill="", y="Voting intention (%)", x="") +
@@ -98,31 +88,23 @@ ggplot(weeks, aes(x=as.Date(week), y=av, col=variable)) +
   theme(legend.position="top")
 dev.off()
 
-weeks %>% group_by(variable) %>% mutate(runmed(av, k=5))
+# most recent three months
+ggplot(int, aes(x=date, y=value, col=variable)) +
+  geom_jitter(alpha=I(.3), size=I(1.4)) +
+  geom_smooth(aes(fill=variable), col=I("grey65"), show_guide=F) +
+  scale_color_manual(values=palette) +
+  scale_fill_manual(values=palette) +
+  labs(col="", y="Voting intention (%)", x="") +
+  guides(colour=guide_legend(override.aes = list(alpha = 1, size=3),
+                             direction="horizontal", keywidth=.8)) +
+  theme(legend.position="top") #+
+  #coord_cartesian(xlim=c(Sys.Date()-
 
-weeks <- weeks[complete.cases(weeks),]
-models <- by(weeks, weeks$variable, function(x) loess(av~as.numeric(week), data=x))
-lapply(models, function(x) predict(x, as.numeric(
 
-library("lme4")
-lmer(av ~ week + variable, data=weeks)
-
-library("MNP")
-library("reshape2")
-
-mnpdf <- dcast(weeks, week ~variable)
-mnpdf <- mnpdf[complete.cases(mnpdf),]
-
-mod <- mnp(cbind(Green, LAB, LD, UKIP, CON) ~ as.numeric(week), 
-           data=mnpdf, verbose=T, trace=T)
-
-predict(mod, newdata=250:350)
-
+## modelling stuff --- not used ::
 library("nnet")
-head(int)
 df <- dcast(int, date + newspaper  ~variable, value.var="value",
             fun.aggregate=mean, na.rm=T)
-head(df)
 df <- df[complete.cases(df),]
 net <- multinom(as.matrix(df[,3:7]) ~ as.numeric(date) + newspaper, data=df)
 
@@ -141,20 +123,3 @@ probs <- melt(probs, id.vars=c("date", "newspaper"))
 ggplot(probs, aes(x=date, y=value, col=newspaper)) +
   geom_point() + facet_wrap(~variable, scales="free_y") +
   scale_color_brewer(type="qual")
-  
-geom_area() +  scale_color_manual(values=palette) +
-  scale_fill_manual(values=palette) 
-
-#company
-company <- c("Panelbase", "YouGov", "Ipsos MORI", "Survation",
-             "ICM", "TNS-?BMRB", "Progressive", "Ashcroft",
-             "Angus Reid")
-
-# Questions::
-# 
-# MORI: How would you vote if there were a General Election held tomorrow? Would you vote… Conservative, Labour, Liberal Democrat [rotate order] or for some other party
-# ICM: If there were to be a general election tomorrow which party do you think you would vote for? Conservative/Labour/Liberal Democrat/Other?
-# YouGov: If there were a general election tomorrow, which party would you vote for? Conservative, Labour, Liberal Democrat, Scottish Nationalist/Plaid cymru, some other party, would not vote, don’t know
-# Populus: If the general election was tomorrow, which party would you vote for? Would it be [rotate order] Conservative, Labour, Liberal Democrat, or another party – or would you not vote at all?
-# Communicate Research: If there were a general election tomorrow, would you vote Conservative, Labour, Liberal Democrat or some other party? 
-# NOP: If you do vote in the next general election, which party will you vote for – Conservative, Labour, Liberal Democrat, or some other party?
