@@ -87,6 +87,7 @@ int$week <- cut(int$date, "week")
 weeks <- int %>% group_by(variable, week) %>% 
   summarise(av=mean(value))
 
+pdf("figures/ge2015_votingIntentionWeekly.pdf", 6, 4)
 ggplot(weeks, aes(x=as.Date(week), y=av, col=variable)) +
   geom_point() + geom_smooth(col=NA, aes(fill=variable)) +
   scale_color_manual(values=palette) +
@@ -95,7 +96,7 @@ ggplot(weeks, aes(x=as.Date(week), y=av, col=variable)) +
   guides(colour=guide_legend(override.aes = list(alpha = 1, size=3),
                              direction="horizontal", keywidth=.8)) +
   theme(legend.position="top")
-
+dev.off()
 
 weeks %>% group_by(variable) %>% mutate(runmed(av, k=5))
 
