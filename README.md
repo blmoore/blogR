@@ -22,3 +22,6 @@ Some of these scripts make use of [`blmR`](https://github.com/blmoore/blmR) whic
 7. Scottish independence: what do the polls say? [[Post](http://blm.io/blog/scottish-independence-polls/) | [Code](R/indyref.R)]
 
 8. Recreating vaccination heatmaps in R [[Post](https://benjaminlmoore.wordpress.com/2015/04/09/recreating-the-vaccination-heatmaps-in-r/) | [Code](R/measles_incidence_heatmap.R)]
+
+9. UK general election polls in rCharts and shiny [[Post](http://blm.io/blog/uk-general-election-rcharts-shiny/) | [Code](R/ge2015_polls.R) | [Shiny](shiny/ge2015/)] 
+
