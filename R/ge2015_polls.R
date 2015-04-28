@@ -88,18 +88,17 @@ ggplot(weeks, aes(x=as.Date(week), y=av, col=variable)) +
   theme(legend.position="top")
 dev.off()
 
-# most recent three months
+# most recent six months
+pdf("figures/ge2015_votingIntention6mo.pdf", 5, 4)
 ggplot(int, aes(x=date, y=value, col=variable)) +
-  geom_jitter(alpha=I(.3), size=I(1.4)) +
+  geom_jitter(alpha=I(1), size=I(1.4)) +
   geom_smooth(aes(fill=variable), col=I("grey65"), show_guide=F) +
   scale_color_manual(values=palette) +
   scale_fill_manual(values=palette) +
   labs(col="", y="Voting intention (%)", x="") +
-  guides(colour=guide_legend(override.aes = list(alpha = 1, size=3),
-                             direction="horizontal", keywidth=.8)) +
-  theme(legend.position="top") #+
-  #coord_cartesian(xlim=c(Sys.Date()-
-
+  theme(legend.position="none") +
+  coord_cartesian(xlim=c(Sys.Date()-(30*6), Sys.Date()))
+dev.off()
 
 ## modelling stuff --- not used ::
 library("nnet")
