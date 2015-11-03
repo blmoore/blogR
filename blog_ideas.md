@@ -12,7 +12,7 @@ of these—I'd be interested to hear about the outcomes!
 * **Supplementary length over time**: after Lior Pachter's talk at GI2013 it would be cool to see a graph of
 supplementary page length vs. article length over time (+per journal). Presumably the latter has remained
 pretty constant while supplementaries are seemingly ever-increasing 
-* **Self-citation**: Academics will often cite their own work but doing so unecessarily might be a sign of 
+* **Self-citation**: Academics will often cite their own work but doing so unnecessarily might be a sign of 
 inflating one's own metrics. One way to test for this might be to count the number of in-text references
 to a self citation: a self-citation referenced many times is probably closely related to the current work whereas 
 a self-citation referenced just once might be more peripheral. If certain authors used this tactic a lot it 
