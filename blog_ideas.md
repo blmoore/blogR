@@ -23,9 +23,6 @@ have looked at this)
 * **Journal review stats**: [scirev](https://scirev.sc/reviews/) has a scrapable table of journal reviews
 * **Received to published times**: Most journals give received, accepted times per article. Who's fast, who's slow, what's
 an acceptable time and is turnaround time decreasing? PLOS offers a full XML dump of all articles if you ask them nicely.
-
-### R related
-
 * **Prevalence of 2.2e-16**: this is commonly the value of `.Machine$double.eps` and hence widely reported as 
 *p*-values. Interesting to see how many of these there are in full-text academic papers over time, also a 
 proxy for R usage.
