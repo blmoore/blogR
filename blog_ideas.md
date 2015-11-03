@@ -60,7 +60,6 @@ though I guess it just balks at these for now.
 ### Politics
 
 * **Commons / PMQs transcripts**:  public opinion a while ago was generally that the UK parliament was too London-focused. By
-scraping debate transcripts we could find out to what extent that's true. I wonder if it is discussed disproportionately  
-more than expected given its size or GDP contribution.
+scraping debate transcripts we could find out to what extent that's true. I wonder if it is discussed disproportionately more than expected given its population size or GDP contribution.
 * **Public schooling**: plot the proportion of publicly-educated politicans per party over time. Not sure there's a good 
 source for this data.
