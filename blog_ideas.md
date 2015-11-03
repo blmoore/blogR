@@ -2,9 +2,10 @@
 
 Here's a list of blog post ideas I've written down in the past, 
 the vast majority of which I'll never get around to though I expect 
-some of these (most?) have already been done somewhere.
-If not, feel free to develop and implement any of these—I'd 
-be interested to hear about the outcomes!
+some of these (most?) have already been done somewhere. In fact
+if it hasn't been done by someone it's probably not a good idea or the data 
+doesn't exist. That said, feel free to develop and implement any
+of these—I'd be interested to hear about the outcomes!
 
 ### Academic
 
@@ -20,6 +21,8 @@ could suggest foul play.
 half-life of a bioinformatics tool? (NB When I mentioned this on twitter a while ago I was pointed to existing studies which
 have looked at this)
 * **Journal review stats**: [scirev](https://scirev.sc/reviews/) has a scrapable table of journal reviews
+* **Received to published times**: Most journals give received, accepted times per article. Who's fast, who's slow, what's
+an acceptable time and is turnaround time decreasing? PLOS offers a full XML dump of all articles if you ask them nicely.
 
 ### R related
 
@@ -39,7 +42,6 @@ character age and actor person age?
 * **Companies on twitter**: which customer-facing twitter accounts reply to the highest proportion of their mentions? Most 
 of their complaints? Response time?
 * **Gadget uptake**: I wonder how the trajectories of various electronics to full market penetrance compare... TVs, PCs, mobiles
-* **Twitter bios**: Twitter bios are usually a few short phrases separated by 
 * **Marijuana use and paranoia**: there's a popular reddit community dedicated to recreational drug use and others relating to 
 conspiracy theories, anxiety etc. A hypothesis might be that active members of drug use subreddits might be more likely to 
 frequent these other boards. Normalisation and building proper subreddit relationship graphs would be key.
@@ -51,6 +53,9 @@ to get multiple cycles...
 * **Least translatable words**: It's interesting that some languages have words which have no equivalent or need a 
 sentence to explain in English (e.g. schadenfreude, zeitgeist). Maybe this could be quantified with the Google translate API, 
 though I guess it just balks at these for now.
+* **Poker: skill vs. luck**: maybe by analysing WSOP placings over consecutive years one could try to tease apart the contribution of luck and skill in no limit texas hold'em, i.e. to what extent are placings in consecutive tournaments independent.
+* **Sport seedings**: many tournaments predict the peformance of their best players by seeding them. Which sports are most accurate with their seedings? Normalise for tournament sizes etc.
+* **Brand logos over time**: it seems brand logos have become simpler over time, e.g. microsoft's 3D wavy flag logo is now four coloured squares. This could be quantified by image analysis, clustering etc. is this a general trend? 
 
 ### Politics
 
